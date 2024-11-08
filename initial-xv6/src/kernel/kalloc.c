@@ -43,7 +43,8 @@ void freerange(void *pa_start, void *pa_end)
   for (; p + PGSIZE <= (char *)pa_end; p += PGSIZE)
   {
     acquire(&ref_cnt_lock);
-    process_ref_cnt[((uint64)p)/PGSIZE]=1; 
+    int index = ((uint64)p)/PGSIZE;
+    process_ref_cnt[index]=1; 
     release(&ref_cnt_lock);
     kfree(p);
   }

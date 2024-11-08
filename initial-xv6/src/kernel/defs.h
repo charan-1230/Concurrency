@@ -10,10 +10,8 @@ struct stat;
 struct superblock;
 
 #include "memlayout.h"
-
-extern int process_ref_cnt[PHYSTOP/PGSIZE];
-
 extern struct spinlock ref_cnt_lock;
+extern int process_ref_cnt[PHYSTOP/PGSIZE];
 
 // bio.c
 void            binit(void);
