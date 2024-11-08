@@ -47,7 +47,8 @@ void usertrap(void)
   // save user program counter.
   p->trapframe->epc = r_sepc();
 
-  if (r_scause() == 8)
+  uint64 scause = r_scause();
+  if (scause == 8)
   {
     // system call
 
@@ -67,6 +68,81 @@ void usertrap(void)
   else if ((which_dev = devintr()) != 0)
   {
     // ok
+  }
+  else if ((scause & 0xFF) == 0x0F)
+  {
+    uint64 pa;
+    uint flags;
+    pte_t *pte;
+    if (r_stval()>=MAXVA){
+      p->killed = 1;
+      exit(-1);
+    }
+    uint64 faultpage_va = PGROUNDDOWN(r_stval());
+
+    pte = walk(p->pagetable, faultpage_va, 0);
+    if (pte == 0)
+    {
+      printf("Error:page not mapped yet at virtual address 0x%x\n", faultpage_va);
+      setkilled(p);
+    }
+    else if ((*pte & PTE_V) && (*pte & PTE_U))
+    {
+      if ((*pte & PTE_COW))
+      {
+        pa = PTE2PA(*pte);
+        int index = (uint64)pa / PGSIZE;
+        int count;
+        acquire(&ref_cnt_lock);
+        count = process_ref_cnt[index];
+        release(&ref_cnt_lock);
+        if (count == 1)
+        {
+          *pte = *pte | PTE_W;
+          *pte = *pte & (~PTE_COW);
+          // uvmunmap(p->pagetable, faultpage_va, PGSIZE, 0);
+          // if (mappages(p->pagetable, faultpage_va, PGSIZE, pa, flags) != 0)
+          // {
+          //   kfree((void *)pa); // Free the physical page to prevent memory leaks
+          //   setkilled(p);      // Mark the process as killed
+          //   return;
+          // }
+          p->trapframe->epc = r_sepc();
+        }
+        else
+        {
+          char *new_page = kalloc();
+          if (new_page == 0)
+          {
+            printf("kalloc : Out of memory\n");
+            setkilled(p); // Mark the process as killed
+          }
+          else
+          {
+            memmove(new_page, (char *)pa, PGSIZE);
+            // uvmunmap(p->pagetable, faultpage_va, PGSIZE, 0);
+            flags = PTE_FLAGS(*pte);
+            flags = flags | PTE_W;
+            flags = flags & (~PTE_COW);
+            kfree((char *)pa);
+
+            *pte = PA2PTE(new_page)|flags;
+            // if (mappages(p->pagetable, faultpage_va, PGSIZE, (uint64)new_page, flags) != 0)
+            // {
+            //   kfree(new_page); // Free the physical page to prevent memory leaks
+            //   setkilled(p);    // Mark the process as killed
+            //   return;
+            // }
+            p->trapframe->epc = r_sepc();
+          }
+        }
+      }
+      else
+      {
+        printf("Error:process doesn't has write acess\n");
+        setkilled(p);
+      }
+    }
   }
   else
   {

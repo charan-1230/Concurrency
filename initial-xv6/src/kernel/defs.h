@@ -9,6 +9,12 @@ struct sleeplock;
 struct stat;
 struct superblock;
 
+#include "memlayout.h"
+
+extern int process_ref_cnt[PHYSTOP/PGSIZE];
+
+extern struct spinlock ref_cnt_lock;
+
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
