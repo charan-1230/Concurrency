@@ -45,8 +45,8 @@ void *execute_req(void *arg)
     sleep(req->t);
     // curr_time += req->t;
 
-    printf(YELLOW "User %d has made request for performing %s on file %d at %d seconds\n" RESET,
-           req->u, req->o, req->f, req->t);
+    printf(YELLOW "User %d has made request for performing %s on file %d at %ld seconds\n" RESET,
+           req->u, req->o, req->f, time(NULL)-base_time);
 
     //lazy waits for 1 sec to process request
     sleep(1);
@@ -57,24 +57,24 @@ void *execute_req(void *arg)
     int curr_time = req->t+1;
     if (file->delete_flag)
     {
-        printf(WHITE "LAZY has declined the request of User %d at %d seconds because an deleted file was requested.\n" RESET, req->u, req->t);
+        printf(WHITE "LAZY has declined the request of User %d at %ld seconds because an deleted file was requested.\n" RESET, req->u, time(NULL)-base_time);
     }
     else if (strcmp(req->o, "READ") == 0)
     {
         time_t start_time;
         while (file->access_count >= c)
         {
-            start_time = time(NULL);
+            // start_time = time(NULL);
             struct timespec ts;
-            ts.tv_sec = start_time + T-1;
+            ts.tv_sec = time(NULL) + T-1;
             int rc = pthread_cond_timedwait(&file->read, &file->lock, &ts);
             if (rc == ETIMEDOUT)
             {
-                printf(RED "User %d canceled the request due to no response at %d seconds\n" RESET, req->u, req->t + T);
+                printf(RED "User %d canceled the request due to no response at %ld seconds\n" RESET, req->u, time(NULL)-base_time+1);
                 pthread_mutex_unlock(&file->lock);
                 return NULL;
             }
-            curr_time += (int)(time(NULL) - start_time);
+            // curr_time += (int)(time(NULL) - start_time);
         }
         file->access_count++;
 
@@ -101,17 +101,17 @@ void *execute_req(void *arg)
         time_t start_time;
         while (file->access_count >= c || file->write_flag)
         {
-            start_time = time(NULL);
+            // start_time = time(NULL);
             struct timespec ts;
-            ts.tv_sec = start_time + T-1;
+            ts.tv_sec = time(NULL) + T-1;
             int rc = pthread_cond_timedwait(&file->write, &file->lock, &ts);
             if (rc == ETIMEDOUT)
             {
-                printf(RED "User %d canceled the request due to no response at %d seconds\n" RESET, req->u, req->t + T);
+                printf(RED "User %d canceled the request due to no response at %ld seconds\n" RESET, req->u,time(NULL)-base_time+1);
                 pthread_mutex_unlock(&file->lock);
                 return NULL;
             }
-            curr_time += (int)(time(NULL) - start_time);
+            // curr_time += (int)(time(NULL) - start_time);
         }
 
         file->write_flag = 1;
@@ -137,17 +137,19 @@ void *execute_req(void *arg)
         time_t start_time;
         while (file->access_count > 0)
         {
-            start_time = time(NULL);
+            // start_time = time(NULL)-base_time;
+            // printf("%ld\n",start_time);
             struct timespec ts;
-            ts.tv_sec = start_time + T-1;
+            ts.tv_sec = time(NULL) + T-1;
             int rc = pthread_cond_timedwait(&file->delete, &file->lock, &ts);
+            // printf("%ld\n",time(NULL)-base_time);
             if (rc == ETIMEDOUT)
             {
-                printf(RED "User %d canceled the request due to no response at %d seconds\n" RESET, req->u, req->t + T);
+                printf(RED "User %d canceled the request due to no response at %ld seconds\n" RESET, req->u,time(NULL)-base_time+1);
                 pthread_mutex_unlock(&file->lock);
                 return NULL;
             }
-            curr_time += (int)(time(NULL) - start_time);
+            // curr_time += (int)(time(NULL) - start_time);
         }
 
         file->delete_flag = 1;
