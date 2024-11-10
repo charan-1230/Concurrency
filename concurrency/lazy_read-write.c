@@ -57,7 +57,7 @@ void *execute_req(void *arg)
     int curr_time = req->t+1;
     if (file->delete_flag)
     {
-        printf(WHITE "LAZY has declined the request of User %d at %d seconds because an deleted file was requested.\n" RESET, req->u, req->f);
+        printf(WHITE "LAZY has declined the request of User %d at %d seconds because an deleted file was requested.\n" RESET, req->u, req->t);
     }
     else if (strcmp(req->o, "READ") == 0)
     {
