@@ -79,22 +79,22 @@ A high-level view of memory consumption shows distinct patterns for each algorit
 
 #### 1. Simple line graph for execution time of Distributed Merge Sort across different no of files
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 #### 2. Simple line graph for execution time of Distributed Count Sort across different no of files
 
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 
 #### 3. Bar graph for comparision of memory usage in (MB) for Distributed Count Sort vs Distributed Merge Sort across average number of files for both the Distributed sorting algorithms
 
-![alt text](image-2.png)
+![alt text](images/image-2.png)
 
 #### 4. Simple line graph for Max Memory Usage in (KB) of Distributed Merge Sort across different no of files
 
-![alt text](image-3.png)
+![alt text](images/image-3.png)
 
 #### 5. Simple line graph for Max Memory Usage in (KB) of Distributed Merge Sort across different no of files
-![alt text](image-4.png)
+![alt text](images/image-4.png)
 
 
 ## 5. Summary:
