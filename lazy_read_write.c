@@ -230,13 +230,7 @@ int main()
             printf(RED "Invalid input format. Make sure 'u' and 'f' and 't' are integers.\n" RESET);
         }
     }
-
-    // printf("\nYou entered:\n");
-    // for (int i = 0; i < req_cnt; i++)
-    // {
-    //     printf("%d, %d, %s, %d\n",
-    //            requests[i].u, requests[i].f, requests[i].o, requests[i].t);
-    // }
+    
     printf("\n");
     printf("LAZY has woken up!\n");
 
